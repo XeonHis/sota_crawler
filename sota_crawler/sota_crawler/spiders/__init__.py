@@ -38,11 +38,13 @@ class sotaSpider(scrapy.Spider):
                 sota_object['sub_category_url'] = "None"
                 sota_object['detail'] = sub_category
                 detail_url = each.xpath('div[@class="card-deck card-break infinite-item"]/div/a/@href').get().strip()
+                detail_url = response.urljoin(detail_url)
                 sota_object['detail_url'] = detail_url
 
                 yield scrapy.Request(detail_url, callback=self.parse_detail, meta={'item': sota_object})
             else:
-                sota_object['sub_category_url'] = response.urljoin(sub_category_url.strip())
+                sub_category_url = response.urljoin(sub_category_url.strip())
+                sota_object['sub_category_url'] = sub_category_url.strip()
 
                 yield scrapy.Request(sub_category_url, callback=self.parse_3rd, meta={'item': sota_object})
 
@@ -53,7 +55,7 @@ class sotaSpider(scrapy.Spider):
         selectors = response.xpath("//div[@class='card']")
 
         for each in selectors:
-            detail = each.xpath("a/div/h1/text()").get.strip()
+            detail = each.xpath("a/div/h1/text()").get().strip()
             sota_object['detail'] = detail
 
             detail_url = response.urljoin(each.xpath("a/@href").get().strip())
@@ -62,4 +64,5 @@ class sotaSpider(scrapy.Spider):
             yield scrapy.Request(detail_url, callback=self.parse_detail, meta={'item': sota_object})
 
     def parse_detail(self, response):
-        pass
+        sota_object = response.meta['item']
+        yield sota_object

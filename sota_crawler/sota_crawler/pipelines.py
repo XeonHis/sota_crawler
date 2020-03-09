@@ -8,6 +8,4 @@
 
 class SotaCrawlerPipeline(object):
     def process_item(self, item, spider):
-        print(item['main_category'])
-        print(item['main_category_url'])
         return item
