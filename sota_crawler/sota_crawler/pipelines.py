@@ -12,8 +12,8 @@ class SotaCrawlerPipeline(object):
     def process_item(self, item, spider):
         data = [
             item['main_category'], item['main_category_url'],
-            item['sub_category'], item['sub_category_url']
-            # item['detail'], item['detail_url']
+            item['sub_category'], item['sub_category_url'],
+            item['detail'], item['detail_url']
         ]
         self.ws.append(data)
         self.wb.save('sota_data.xlsx')

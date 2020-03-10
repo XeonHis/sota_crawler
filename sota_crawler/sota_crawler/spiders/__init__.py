@@ -31,18 +31,17 @@ class sotaSpider(scrapy.Spider):
         selectors = response.xpath("//div[contains(@class,'featured-task')]/div[@class='row']")
 
         for each in selectors:
-            # second_object = SotaCrawlerItem()
-
+            second_obejct = SotaCrawlerItem()
             sub_category = each.xpath('div/h4/text()').get().strip()
-            main_object['sub_category'] = sub_category
-            # second_object['sub_category'] = sub_category
+            second_obejct['sub_category'] = sub_category
 
-            sub_category_url = main_object['main_category_url'] + '/'+sub_category.lower().replace(' ', '-')
-            main_object['sub_category_url'] = sub_category_url
-            # second_object['sub_category_url'] = sub_category_url
+            sub_category_url = main_object['main_category_url'] + '/' + sub_category.lower().replace(' ', '-')
+            second_obejct['sub_category_url'] = sub_category_url
 
+            yield scrapy.Request(sub_category_url, callback=self.parse_3rd,
+                                 meta={'main': main_object, 'second': second_obejct})
 
-            yield main_object
+            # yield main_object
 
     def parse_3rd(self, response):
         main_object = response.meta['main']
@@ -50,16 +49,24 @@ class sotaSpider(scrapy.Spider):
         selectors = response.xpath("//div[@class='card']")
 
         for each in selectors:
+            final_object = SotaCrawlerItem()
             third_object = SotaCrawlerItem()
-
             detail = each.xpath("a/div/h1/text()").get().strip()
             third_object['detail'] = detail
 
             detail_url = response.urljoin(each.xpath("a/@href").get().strip())
             third_object['detail_url'] = detail_url
 
-            yield scrapy.Request(detail_url, callback=self.parse_detail,
-                                 meta={'main': main_object, 'second': second_object, 'third': third_object})
+            final_object['main_category'] = main_object['main_category']
+            final_object['main_category_url'] = main_object['main_category_url']
+            final_object['sub_category'] = second_object['sub_category']
+            final_object['sub_category_url'] = second_object['sub_category_url']
+            final_object['detail'] = third_object['detail']
+            final_object['detail_url'] = third_object['detail_url']
+
+            yield final_object
+
+            # yield scrapy.Request(detail_url, callback=self.parse_detail, meta={'main': main_object})
 
     def parse_detail(self, response):
         final_object = SotaCrawlerItem()
